@@ -2,13 +2,14 @@ package UDP;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-
-import javax.xml.crypto.Data;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server implements Runnable {
 
     DatagramSocket socket;
     Boolean running = false;
+    ExecutorService pool = Executors.newFixedThreadPool(20);
 
     public Server() {
         socket = null;
@@ -33,7 +34,6 @@ public class Server implements Runnable {
             }
         }
         return openclosed;
-
     }
 
     @Override
@@ -56,16 +56,16 @@ public class Server implements Runnable {
                 continue;
             }
             //on envoie une réponse
-            byte[] data = packet.getData();
-
-            System.out.println("Received: " + new String(data));
-            DatagramPacket response = new DatagramPacket(data, data.length, packet.getAddress(), packet.getPort());
-            try {
-                socket.send(response);
-            } catch (Exception e) {
-                e.printStackTrace();
-                continue;
-            }
+            pool.execute(new Process(packet));
+            // byte[] data = packet.getData();
+            // System.out.println("Received: " + new String(data));
+            // DatagramPacket response = new DatagramPacket(data, data.length, packet.getAddress(), packet.getPort());
+            // try {
+            //     socket.send(response);
+            // } catch (Exception e) {
+            //     e.printStackTrace();
+            //     continue;
+            // }
         }
     }
 }
