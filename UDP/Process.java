@@ -13,7 +13,7 @@ import java.util.HashMap;
 public class Process implements Runnable {
     
     private static HashMap<String, String[]> users = new HashMap<String, String[]>(); // <username, [ip, port, room]>
-    
+    private static HashMap<String[], String > usernames = new HashMap<String[], String>(); // <[ip, port], username>
     private String message;
     private String action;
     private InetAddress addr;
@@ -35,7 +35,12 @@ public class Process implements Runnable {
     public void run() {
 
         System.out.println("Received: " + message);
-        
+
+        if(usernames.containsKey(new String[]{addr.toString(), port + ""})){ // TODO utiliser une structure de donnée plutot, l'adresse est stocké dans un autre type que string
+
+        }else{
+
+        }
         // TODO trouve pseudo avec ip/port    
         
         switch (action) {
