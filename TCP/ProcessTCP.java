@@ -3,12 +3,12 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Process implements Runnable {
+public class ProcessTCP implements Runnable {
     
     private Socket socket;
     private int number;
 
-    public Process(Socket s, int number) {
+    public ProcessTCP(Socket s, int number) {
         this.socket = s;
         this.number = number;
     }

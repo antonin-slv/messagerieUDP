@@ -3,7 +3,7 @@ import java.net.DatagramPacket;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Client {
+public class ClientTCP {
     @SuppressWarnings("resource")
 	public static void main(String[] args) {
         

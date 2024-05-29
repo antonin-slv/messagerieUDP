@@ -9,7 +9,7 @@ import java.io.PrintWriter;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 
-public class Server {
+public class ServerTCP {
     @SuppressWarnings("resource")
     public static void main(String[] args) {
 
@@ -40,7 +40,7 @@ public class Server {
             Socket new_task;
             try {
                 new_task = listener.accept();
-                pool.execute(new Process(new_task,i));
+                pool.execute(new ProcessTCP(new_task,i));
                 System.out.println("Connection "+ i + " done");
                 
             } catch(IOException e) {
