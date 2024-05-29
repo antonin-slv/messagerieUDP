@@ -73,6 +73,9 @@ public class Client implements Runnable {
                     running = false;
                 }
             }
+            else {
+                message = "/msg " + message;
+            }
 
             byte[] data = message.getBytes();
             try {
