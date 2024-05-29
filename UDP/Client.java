@@ -1,30 +1,37 @@
 package UDP;
 
 import java.io.BufferedReader;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.Socket;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Client implements Runnable {
 
+
+    int port = 12345;
+
+    protected DatagramSocket socket;
+    InetAddress addr;
+
+    String pseudo;
+
+    ArrayList<String> messages = new ArrayList<String>();
+
     public Client() {
-        
-    }
+        System.out.printf("Entre ton pseudo : ");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        try{
+            pseudo = reader.readLine().replace('/', '_').replace(' ', '_');
+        }catch(IOException e){
+            e.printStackTrace();
+            return;
+        }
 
-
-
-    @Override
-    public void run() {
-
-
-        int port = 12345;
-        DatagramSocket socket;
-        InetAddress addr;
         try {
             addr = InetAddress.getByName("localhost");
             socket = new DatagramSocket();
@@ -32,8 +39,24 @@ public class Client implements Runnable {
             e.printStackTrace();
             return;
         }
+
+    }
+    public Client(DatagramSocket socket) {
+        super();
+        this.socket.close();
+        this.socket = socket;
+    }
+
+    @Override
+    public void run() {
         String message;
-        while (true) {
+
+        ExecutorService executor = Executors.newFixedThreadPool(1);
+        executor.execute(new ClientListener(this));
+
+        Boolean running = true;
+        while (running) {
+            System.out.printf(pseudo + " : ");
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             try{
                 message = reader.readLine();
@@ -41,9 +64,13 @@ public class Client implements Runnable {
                 e.printStackTrace();
                 continue;
             }
+
+            if (message == null || message.length() == 0) {
+                continue;
+            }
             if (message.charAt(0) == '/') {
                 if (message.equals("/quit")) {
-                    break;
+                    running = false;
                 }
             }
 
@@ -52,16 +79,11 @@ public class Client implements Runnable {
 
                 DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
                 socket.send(packet);
-                //le client attend la réponse
-                byte[] buffer = new byte[1024];
-                DatagramPacket response = new DatagramPacket(buffer, buffer.length);
-                socket.receive(response);
-                System.out.println("Client received : " + new String(response.getData()));
-            
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        executor.shutdown();
         socket.close();
     }
     
