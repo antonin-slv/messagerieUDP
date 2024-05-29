@@ -1,6 +1,8 @@
 package UDP;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -18,7 +20,14 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
-        String message = System.console().readLine();
+        String message = "vide";
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        try{
+            message = reader.readLine();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+
 
         byte[] data = message.getBytes();
         try {
