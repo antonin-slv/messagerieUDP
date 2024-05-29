@@ -18,6 +18,8 @@ premier message envoyé par le client au serveur pour se connecter
 ```
 sans ce message le serveur ne traitera pas les autres messages car l'utilisateur n'est pas enrégistré dans la liste des clients connectés (il n'a pas de pseudo associé à une adresse ip et un port)
 
+Le Pseudo doit être en un seul mot sans espace et ne doit pas être déjà utilisé par un autre client
+
 ## deconexion
 message envoyé par le client pour se deconnecter
 ```
