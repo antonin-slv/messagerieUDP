@@ -57,6 +57,8 @@ public class Server implements Runnable {
             }
             //on envoie une réponse
             byte[] data = packet.getData();
+
+            System.out.println("Received: " + new String(data));
             DatagramPacket response = new DatagramPacket(data, data.length, packet.getAddress(), packet.getPort());
             try {
                 socket.send(response);
