@@ -22,6 +22,8 @@ public class Client implements Runnable {
 
     ArrayList<String> messages = new ArrayList<String>();
 
+    Boolean connected = false;
+
     public Client() {
         System.out.printf("Entre ton pseudo : ");
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -54,6 +56,20 @@ public class Client implements Runnable {
         ExecutorService executor = Executors.newFixedThreadPool(1);
         executor.execute(new ClientListener(this));
 
+
+        //connexion :
+        message = "/co " + pseudo;
+
+        byte[] data;
+        data = message.getBytes();
+        DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
+        try {
+            socket.send(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        connected = true;
         Boolean running = true;
         while (running) {
             System.out.printf(pseudo + " : ");
@@ -72,15 +88,21 @@ public class Client implements Runnable {
                 if (message.equals("/quit")) {
                     running = false;
                 }
+                if (message.contains("/co ")) {
+                    if (connected) {
+                        System.out.println("You are already connected");
+                        continue;
+                    }
+                }
             }
             else {
                 message = "/msg " + message;
             }
 
-            byte[] data = message.getBytes();
+            data = message.getBytes();
             try {
 
-                DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
+                packet = new DatagramPacket(data, data.length, addr, port);
                 socket.send(packet);
             } catch (IOException e) {
                 e.printStackTrace();
