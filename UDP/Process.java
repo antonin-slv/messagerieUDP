@@ -29,7 +29,7 @@ public class Process implements Runnable {
         if(_messageSplit.length != 2 || !_messageSplit[0].equals("/co")){
             repondre("/err Mauvaise commande de connexion");
         }else{
-            this.user.setPseudo(_messageSplit[1]);
+            this.user.setPseudo(_messageSplit[1].trim());
             users.add(user);
             
             // on cherche un port disponible pour mettre en place la connexion
@@ -145,6 +145,7 @@ public class Process implements Runnable {
     }
 
     private void logMessage(String message) {
+        System.out.println("Logging message");
         try {
             FileOutputStream fos = new FileOutputStream(user.getRoom() + ".log", true);
             String date = new SimpleDateFormat("[dd/MM/yyyy HH:mm:ss] ").format(Calendar.getInstance().getTime());

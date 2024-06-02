@@ -2,6 +2,7 @@ package UDP;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.Arrays;
 
 public class ClientListener implements Runnable {
 
@@ -30,12 +31,10 @@ public class ClientListener implements Runnable {
                 continue;
             }
 
-            father.messages.add(new String(entree.getData()));
-            System.out.println("\n\n\n\n");
-            for (String message : father.messages) {
-                System.out.println(message);
-            }
-            System.out.printf(father.pseudo + " : ");
+            
+           
+            System.out.println("\t" + new String(entree.getData(), 0, entree.getData().length));
+
         }
 
 

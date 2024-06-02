@@ -24,7 +24,7 @@ public class Client implements Runnable {
 
     String pseudo;
 
-    ArrayList<String> messages = new ArrayList<String>();
+    String message;
 
     Boolean connected = false;
 
@@ -66,10 +66,14 @@ public class Client implements Runnable {
 
         Boolean running = true;
         while (running) {
-            System.out.printf(pseudo + " : ");
+            message = "";
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             try{
-                message = reader.readLine();
+                char typed;
+                while ((typed = (char) reader.read()) != '\n') {
+                    message += typed;
+                }
+                
             }catch(IOException e){
                 e.printStackTrace();
                 continue;
@@ -82,6 +86,8 @@ public class Client implements Runnable {
                 if (message.equals("/quit")) {
                     running = false;
                     executor.shutdown();
+                    connected = false;
+                    continue;
                 }
                 if (message.contains("/co ")) {
                     if (connected) {
@@ -105,6 +111,7 @@ public class Client implements Runnable {
         }
         executor.shutdown();
         socket.close();
+
     }
     private boolean connect() {
         //connexion :

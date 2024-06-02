@@ -75,7 +75,8 @@ public class User {
     public void sendMessage(String message) {
         try {
             DatagramSocket socket = new DatagramSocket();
-            socket.send(new DatagramPacket(message.getBytes(), message.length(), ip, port));
+            byte [] data = message.getBytes();
+            socket.send(new DatagramPacket(data, data.length, ip, port));
             socket.close();
         } catch (Exception e) {
             e.printStackTrace();
