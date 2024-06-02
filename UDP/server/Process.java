@@ -1,6 +1,8 @@
 package UDP.server;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -146,8 +148,19 @@ public class Process implements Runnable {
 
     private void logMessage(String message) {
         System.out.println("Logging message");
-        try {
-            FileOutputStream fos = new FileOutputStream(user.getRoom() + ".log", true);
+
+        //on crée le dossier s'il n'existe pas
+        String directoryPath = "UDP" + File.separator + "server" + File.separator + "rooms";
+        File directory = new File(directoryPath);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        String filePath = directoryPath + File.separator + user.getRoom() + ".log";
+
+        //on essai d'ouvrir.créer le fichier
+        try (FileOutputStream fos = new FileOutputStream(filePath, true)) {
+            //on écrit dans le fichier
             String date = new SimpleDateFormat("[dd/MM/yyyy HH:mm:ss] ").format(Calendar.getInstance().getTime());
             fos.write((date + " " + user.getPseudo() + " " + message.strip()+"\n").getBytes());
             fos.close();
