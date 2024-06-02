@@ -1,13 +1,26 @@
 package UDP;
 
-public class User {
-    private String pseudo;
-    private String ip;
-    private int port;
-    private String room;
-    private boolean connected;
+import java.net.InetAddress;
 
-    public User(String pseudo, String ip, int port) {
+public class User {
+    
+    private String pseudo;
+   
+    private InetAddress ip;
+    
+    private int port;
+
+    private String room;
+    
+    private boolean connected;
+    
+
+    public User(InetAddress ip, int port) {
+        this.ip = ip;
+        this.port = port;
+    }
+
+    public User(String pseudo, InetAddress ip, int port) {
         this.pseudo = pseudo;
         this.ip = ip;
         this.port = port;
@@ -29,11 +42,15 @@ public class User {
         return pseudo;
     }
 
-    public String getIp() {
+    public void setPseudo(String pseudo) {
+        this.pseudo = pseudo;
+    }
+
+    public InetAddress getIp() {
         return ip;
     }
 
-    public void setIp(String ip) {
+    public void setIp(InetAddress ip) {
         this.ip = ip;
     }
 
