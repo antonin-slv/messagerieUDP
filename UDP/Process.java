@@ -24,24 +24,20 @@ public class Process implements Runnable {
         this.user.setRoom("Bienvenue");
 
         String _messagecomplet = new String(packet.getData());
+        System.out.println("Message reçu : " + _messagecomplet);
         String[] _messageSplit = _messagecomplet.split(" ");
-        if(_messageSplit.length != 2 || _messageSplit[0] != "/co"){
-            user.sendMessage("/err Mauvaise commande de connexion");
+        if(_messageSplit.length != 2 || !_messageSplit[0].equals("/co")){
+            repondre("/err Mauvaise commande de connexion");
         }else{
             this.user.setPseudo(_messageSplit[1]);
             users.add(user);
             
             // on cherche un port disponible pour mettre en place la connexion
             try {
-                int port = getPort();
-                if(port == -1) {
-                    user.sendMessage("/err No free port, try again later");
-                    System.out.println("No free port available for a new connection");
-                    return;
-                }
-                this.socket = new DatagramSocket(port);
-                user.sendMessage("/co " + port);
-                System.out.println("Server started on port --> " + this.socket.getPort());
+                this.socket = new DatagramSocket();
+                int port = this.socket.getLocalPort(); 
+                repondre("/co " + port);
+                System.out.println("New listening port for user --> " + port);
                 System.out.println("User " + user.getPseudo() + " connected");
                 user.connect();
     
@@ -67,7 +63,7 @@ public class Process implements Runnable {
 
             // on a reçu qqch :
 
-            String _messagecomplet = new String(packet.getData());
+            String _messagecomplet = new String(packet.getData()).trim();
             String[] _messageSplit = _messagecomplet.split(" ");
             
             String action = _messageSplit[0];
@@ -88,11 +84,21 @@ public class Process implements Runnable {
                 case "/room" -> joinRoom(message);
                 default -> {
                     System.out.println("Unknown command");
-                    user.sendMessage("/err Unknown command");
+                    repondre("Unknown command");
                 }
             }
         }
-        socket.close();
+    }
+    
+    public void repondre(String rep) {
+        DatagramPacket reponse = new DatagramPacket(rep.getBytes(), rep.length(), this.user.getIp(), this.user.getPort());
+        try {
+            DatagramSocket socket = new DatagramSocket();
+            socket.send(reponse);
+            socket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static int getPort() {
@@ -118,6 +124,7 @@ public class Process implements Runnable {
         user.sendMessage("/msg You are now disconnected, bye bye !");
         user.disconnect();
         System.out.println("User " + user.getPseudo() + " disconnected");
+        socket.close();
     }
 
     public void newMessage(String message) {

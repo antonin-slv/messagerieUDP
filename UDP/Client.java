@@ -7,15 +7,19 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.xml.crypto.Data;
 
 public class Client implements Runnable {
 
 
-    int port = 12345;
+    int port = 13401;
 
     protected DatagramSocket socket;
+
     InetAddress addr;
 
     String pseudo;
@@ -53,23 +57,13 @@ public class Client implements Runnable {
     public void run() {
         String message;
 
+        if (!connect()) return;
+
         ExecutorService executor = Executors.newFixedThreadPool(1);
         executor.execute(new ClientListener(this));
 
+        
 
-        //connexion :
-        message = "/co " + pseudo;
-
-        byte[] data;
-        data = message.getBytes();
-        DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
-        try {
-            socket.send(packet);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-        connected = true;
         Boolean running = true;
         while (running) {
             System.out.printf(pseudo + " : ");
@@ -87,6 +81,7 @@ public class Client implements Runnable {
             if (message.charAt(0) == '/') {
                 if (message.equals("/quit")) {
                     running = false;
+                    executor.shutdown();
                 }
                 if (message.contains("/co ")) {
                     if (connected) {
@@ -99,10 +94,10 @@ public class Client implements Runnable {
                 message = "/msg " + message;
             }
 
-            data = message.getBytes();
+            byte[] data = message.getBytes();
             try {
 
-                packet = new DatagramPacket(data, data.length, addr, port);
+                DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
                 socket.send(packet);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -110,6 +105,55 @@ public class Client implements Runnable {
         }
         executor.shutdown();
         socket.close();
+    }
+    private boolean connect() {
+        //connexion :
+        connected = false;
+        int counter = 0;
+        while (!connected && counter < 5) {
+            counter++;
+            String message = "/co " + pseudo;
+            
+
+            //envoie message pour demander la conexion
+            byte[] data = message.getBytes();
+            DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
+            try {
+                socket.send(packet);
+            } catch (IOException e) {
+                e.printStackTrace();
+                continue;
+            }
+            
+            //attend réponse du serveur
+            byte[] buffer = new byte[1024];
+            DatagramPacket entree = new DatagramPacket(buffer, buffer.length);
+            try {
+                socket.receive(entree);
+            } catch (IOException e) {
+                e.printStackTrace();
+                continue;
+            }
+
+            //analyse la réponse du serveur
+            String [] response = new String(entree.getData()).trim().split(" ");
+            int newPort = -1;
+            if (response[0].equals("/co")) {
+                try { 
+                    newPort = Integer.parseInt(response[1]);
+                } catch (NumberFormatException e) {
+                    System.out.println(newPort + " : " + response[1] + " is not a valid port");
+                    continue;
+                }
+                port = newPort;
+                connected = true;
+                System.out.println("Connected");
+            } else {
+                System.out.println("Connection failed");
+                continue;
+            }
+        }
+        return connected;
     }
     
 }

@@ -14,15 +14,19 @@ public class ClientListener implements Runnable {
     @Override
     public void run() {
         DatagramPacket entree = null;
-        while (true) {
+
+        while (!father.socket.isClosed()) {
 
             try {
-            //le client attend la réponse
-            byte[] buffer = new byte[1024];
-            entree = new DatagramPacket(buffer, buffer.length);
-            father.socket.receive(entree);
+                //le client attend la réponse
+                byte[] buffer = new byte[1024];
+                entree = new DatagramPacket(buffer, buffer.length);
+                father.socket.receive(entree);
             } catch (Exception e) {
-                e.printStackTrace();
+                if (father.socket.isClosed()) {
+                    return;
+                }
+                System.out.println("Erreur lors de la réception du message : " + new String(entree.getData(), 0, entree.getData().length));
                 continue;
             }
 
