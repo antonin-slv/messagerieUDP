@@ -5,8 +5,6 @@ import java.net.Socket;//pour les sockets de communication "individuels"
 import java.util.concurrent.ExecutorService;
 import java.io.IOException;
 //I-O
-import java.io.PrintWriter;
-import java.util.Scanner;
 import java.util.concurrent.Executors;
 
 public class ServerTCP {

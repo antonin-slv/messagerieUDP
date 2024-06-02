@@ -1,5 +1,7 @@
 package UDP;
 
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 public class User {
@@ -70,4 +72,13 @@ public class User {
         this.room = room;
     }
 
+    public void sendMessage(String message) {
+        try {
+            DatagramSocket socket = new DatagramSocket();
+            socket.send(new DatagramPacket(message.getBytes(), message.length(), ip, port));
+            socket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

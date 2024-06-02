@@ -3,8 +3,6 @@ package UDP;
 import java.io.FileOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,11 +21,12 @@ public class Process implements Runnable {
     public Process(DatagramPacket packet) {
         
         this.user = new User(packet.getAddress(), packet.getPort());
+        this.user.setRoom("Bienvenue");
 
         String _messagecomplet = new String(packet.getData());
         String[] _messageSplit = _messagecomplet.split(" ");
         if(_messageSplit.length != 2 || _messageSplit[0] != "/co"){
-            repondre("/err Mauvaise commande de connexion");
+            user.sendMessage("/err Mauvaise commande de connexion");
         }else{
             this.user.setPseudo(_messageSplit[1]);
             users.add(user);
@@ -36,12 +35,12 @@ public class Process implements Runnable {
             try {
                 int port = getPort();
                 if(port == -1) {
-                    repondre("/err No free port, try again later");
+                    user.sendMessage("/err No free port, try again later");
                     System.out.println("No free port available for a new connection");
                     return;
                 }
                 this.socket = new DatagramSocket(port);
-                repondre("/co " + port);
+                user.sendMessage("/co " + port);
                 System.out.println("Server started on port --> " + this.socket.getPort());
                 System.out.println("User " + user.getPseudo() + " connected");
                 user.connect();
@@ -51,30 +50,6 @@ public class Process implements Runnable {
             }
         }
     }
-    /**
-    public Process(DatagramPacket packet) {
-        
-        String _messagecomplet = new String(packet.getData());
-        String[] _messageSplit = _messagecomplet.split(" ");
-
-        this.action = _messageSplit[0];
-        this.message = null;
-        if(_messageSplit.length > 1) { //si il existe, on récupère le message (sans l'action)
-            this.message = _messagecomplet.substring(action.length() + 1);
-        }
-        this.addr = packet.getAddress();
-        this.port = packet.getPort();
-        this.pseudo = "";
-
-        if(users != null && !users.isEmpty()) {
-            for (User user : users) { // on cherche le pseudo correspondant à l'ip/port
-                if (user.getIp().equals(addr.toString()) && user.getPort() == port) {
-                    pseudo = user.getPseudo();
-                }
-            }
-        }
-    }
-    **/
     
     public void run() {
 
@@ -113,22 +88,11 @@ public class Process implements Runnable {
                 case "/room" -> joinRoom(message);
                 default -> {
                     System.out.println("Unknown command");
-                    repondre("Unknown command");
+                    user.sendMessage("/err Unknown command");
                 }
             }
         }
         socket.close();
-    }
-    
-    public void repondre(String rep) {
-        DatagramPacket reponse = new DatagramPacket(rep.getBytes(), rep.length(), this.user.getIp(), this.user.getPort());
-        try {
-            DatagramSocket socket = new DatagramSocket();
-            socket.send(reponse);
-            socket.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public static int getPort() {
@@ -147,22 +111,29 @@ public class Process implements Runnable {
 
     public void connexion() {
         System.out.println("User " + user.getPseudo() + " is already connected and tried to connect again (so dumb)");
-        repondre("You are already connected");
+        user.sendMessage("/err You are already connected");
     }
 
     public void deconnexion() {
-        repondre("/msg You are now disconnected, bye bye !");
+        user.sendMessage("/msg You are now disconnected, bye bye !");
         user.disconnect();
         System.out.println("User " + user.getPseudo() + " disconnected");
     }
 
     public void newMessage(String message) {
-        // TODO     
+        logMessage(message);
+        System.out.println("User " + user.getPseudo() + " sent a message : " + message + " in room " + user.getRoom());
+        message = user.getPseudo() + " : " + message;
+        for (User u : users) {
+            if (u.getRoom().equals(user.getRoom()) && u.isConnected() && u != user){
+                u.sendMessage(message);
+            }
+        }
     }
 
     public void joinRoom(String room) {
         user.setRoom(room);
-        repondre("/info You joined the room " + room);
+        user.sendMessage("/info You joined the room " + room);
         System.out.println("User " + user.getPseudo() + " joined the room " + room);
     }
 
@@ -170,7 +141,7 @@ public class Process implements Runnable {
         try {
             FileOutputStream fos = new FileOutputStream(user.getRoom() + ".log", true);
             String date = new SimpleDateFormat("[dd/MM/yyyy HH:mm:ss] ").format(Calendar.getInstance().getTime());
-            fos.write((date + message.strip()+"\n").getBytes());
+            fos.write((date + " " + user.getPseudo() + " " + message.strip()+"\n").getBytes());
             fos.close();
         } catch (Exception e) {
             e.printStackTrace();
