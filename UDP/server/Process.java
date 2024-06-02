@@ -1,4 +1,4 @@
-package UDP;
+package UDP.server;
 
 import java.io.FileOutputStream;
 import java.net.DatagramPacket;
