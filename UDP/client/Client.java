@@ -61,17 +61,43 @@ public class Client implements Runnable {
             message = getInput(1);
             //traitement des commandes
             if (message.charAt(0) == '/') {
-                if (message.equals("/quit")) {
-                    running = false;
-                    executor.shutdown();
-                    connected = false;
-                    continue;
-                }
-                if (message.contains("/co ")) {
-                    if (connected) {
-                        System.out.println("You are already connected");
+                String[] command = message.split(" ");
+                switch (command[0]) {
+                    case "/quit":
+                        running = false;
+                        executor.shutdown();
+                        connected = false;
+                        break;
+                    case "/room":
+                        if (command.length == 2) {
+                            message = "/room " + command[1];
+                        } else {
+                            System.out.println("Usage : /join <room>");
+                            continue;
+                        }
+                        break;
+                    case "/co":
+                        if (connected) { 
+                            System.out.println("You are already connected");
+                        } else {
+                            if (command.length == 2) {
+                                message = "/co " + command[1].replace("/", "_");
+                            } else {
+                                System.out.println("Usage : /co <pseudo>    (without / or spaces)");
+                                continue;
+                            }
+                        }
                         continue;
-                    }
+                    case "/msg":
+                        break;
+                    case "/help":
+                        System.out.println("List of commands :");
+                        System.out.println("/quit : disconnect from the server");
+                        System.out.println("/room <room> : join a room");
+                        System.out.println("/co <pseudo> : connect to the server");
+                        System.out.println("/msg <message> : send a message to the room");
+                        System.out.println("/help : display this message");
+                        continue;
                 }
             }
             else {

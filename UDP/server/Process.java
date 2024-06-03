@@ -151,7 +151,7 @@ public class Process implements Runnable {
         //on essai d'ouvrir.créer le fichier
         try (FileOutputStream fos = new FileOutputStream(filePath, true)) {
             //on écrit dans le fichier
-            String date = new SimpleDateFormat("[dd/MM/yyyy HH:mm:ss] ").format(Calendar.getInstance().getTime());
+            String date = new SimpleDateFormat("[dd/MM/yyyy HH:mm:ss]").format(Calendar.getInstance().getTime());
             fos.write((date + " " + user.getPseudo() + " " + message.strip()+"\n").getBytes());
             fos.close();
         } catch (Exception e) {
@@ -160,7 +160,7 @@ public class Process implements Runnable {
     }
 
     private void hist() {
-        System.out.println("User " + user.getPseudo() + " asked for history in room " + user.getRoom());
+        System.out.println("User " + user.getPseudo() + " asked for history of " + user.getRoom());
         String filePath = "UDP" + File.separator + "server" + File.separator + "rooms" + File.separator + user.getRoom() + ".log";
         File file = new File(filePath);
         if (!file.exists()) {
@@ -172,7 +172,7 @@ public class Process implements Runnable {
             ArrayList<String> lines = new ArrayList<String>();
             java.util.Scanner scanner = new java.util.Scanner(file);
             while (scanner.hasNextLine()) {
-                lines.add(scanner.nextLine());
+                lines.add("/hist " + scanner.nextLine());
             }
             scanner.close();
 
