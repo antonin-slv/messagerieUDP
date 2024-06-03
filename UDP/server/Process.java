@@ -2,7 +2,6 @@ package UDP.server;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -84,6 +83,8 @@ public class Process implements Runnable {
                 case "/quit" -> deconnexion();
                 case "/msg" -> newMessage(message);                    
                 case "/room" -> joinRoom(message);
+                case "/help" -> repondre("Available commands : /msg, /room, /quit, /help");
+                case "/hist" -> hist();
                 default -> {
                     System.out.println("Unknown command");
                     repondre("Unknown command");
@@ -164,6 +165,44 @@ public class Process implements Runnable {
             String date = new SimpleDateFormat("[dd/MM/yyyy HH:mm:ss] ").format(Calendar.getInstance().getTime());
             fos.write((date + " " + user.getPseudo() + " " + message.strip()+"\n").getBytes());
             fos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void hist() {
+        System.out.println("User " + user.getPseudo() + " asked for history in room " + user.getRoom());
+        String filePath = "UDP" + File.separator + "server" + File.separator + "rooms" + File.separator + user.getRoom() + ".log";
+        File file = new File(filePath);
+        if (!file.exists()) {
+            user.sendMessage("/info No history available for this room");
+            return;
+        }
+        try {
+            // on lit le fichier et on met le contenu dans un tableau de string
+            ArrayList<String> lines = new ArrayList<String>();
+            java.util.Scanner scanner = new java.util.Scanner(file);
+            while (scanner.hasNextLine()) {
+                lines.add(scanner.nextLine());
+            }
+            scanner.close();
+
+            // on récupère les 10 dernières lignes
+            
+            if(lines.size() == 0) {
+                user.sendMessage("/info No history available for this room");
+                
+                return;
+            }else if(lines.size() <= 10) {
+                lines = new ArrayList<String>(lines.subList(0, lines.size()));
+            }else {
+                lines = new ArrayList<String>(lines.subList(lines.size() - 10, lines.size()));
+            }
+
+            for (String line : lines) {
+                user.sendMessage(line);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
