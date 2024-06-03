@@ -28,7 +28,7 @@ public class Process implements Runnable {
         System.out.println("Message reçu : " + _messagecomplet);
         String[] _messageSplit = _messagecomplet.split(" ");
         if(_messageSplit.length != 2 || !_messageSplit[0].equals("/co")){
-            repondre("/err Mauvaise commande de connexion");
+            user.sendMessage("/err Mauvaise commande de connexion");
         }else{
             this.user.setPseudo(_messageSplit[1].trim());
             users.add(user);
@@ -37,7 +37,7 @@ public class Process implements Runnable {
             try {
                 this.socket = new DatagramSocket();
                 int port = this.socket.getLocalPort(); 
-                repondre("/co " + port);
+                user.sendMessage("/co " + port);
                 System.out.println("New listening port for user --> " + port);
                 System.out.println("User " + user.getPseudo() + " connected");
                 user.connect();
@@ -83,24 +83,13 @@ public class Process implements Runnable {
                 case "/quit" -> deconnexion();
                 case "/msg" -> newMessage(message);                    
                 case "/room" -> joinRoom(message);
-                case "/help" -> repondre("Available commands : /msg, /room, /quit, /help");
+                case "/help" -> user.sendMessage("Available commands : /msg, /room, /quit, /help");
                 case "/hist" -> hist();
                 default -> {
                     System.out.println("Unknown command");
-                    repondre("Unknown command");
+                    user.sendMessage("Unknown command");
                 }
             }
-        }
-    }
-    
-    public void repondre(String rep) {
-        DatagramPacket reponse = new DatagramPacket(rep.getBytes(), rep.length(), this.user.getIp(), this.user.getPort());
-        try {
-            DatagramSocket socket = new DatagramSocket();
-            socket.send(reponse);
-            socket.close();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
