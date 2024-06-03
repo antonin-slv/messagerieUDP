@@ -29,14 +29,8 @@ public class Client implements Runnable {
     Boolean connected = false;
 
     public Client() {
-        System.out.printf("Entre ton pseudo : ");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        try{
-            pseudo = reader.readLine().replace('/', '_').replace(' ', '_');
-        }catch(IOException e){
-            e.printStackTrace();
-            return;
-        }
+            System.out.printf("Entre ton pseudo : ");
+            pseudo = getInput(2).replace('/', '_').replace(' ', '_');
 
         try {
             addr = InetAddress.getByName("localhost");
@@ -61,27 +55,11 @@ public class Client implements Runnable {
 
         ExecutorService executor = Executors.newFixedThreadPool(1);
         executor.execute(new ClientListener(this));
-
-        
-
         Boolean running = true;
         while (running) {
-            message = "";
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            try{
-                char typed;
-                while ((typed = (char) reader.read()) != '\n') {
-                    message += typed;
-                }
-                
-            }catch(IOException e){
-                e.printStackTrace();
-                continue;
-            }
-
-            if (message == null || message.length() == 0) {
-                continue;
-            }
+            //récupération du message
+            message = getInput(1);
+            //traitement des commandes
             if (message.charAt(0) == '/') {
                 if (message.equals("/quit")) {
                     running = false;
@@ -100,13 +78,9 @@ public class Client implements Runnable {
                 message = "/msg " + message;
             }
 
-            byte[] data = message.getBytes();
-            try {
-
-                DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
-                socket.send(packet);
-            } catch (IOException e) {
-                e.printStackTrace();
+            //envoie du message
+            if (!sendMessage(message)) {
+                System.out.println("Error while sending message");
             }
         }
         executor.shutdown();
@@ -163,4 +137,32 @@ public class Client implements Runnable {
         return connected;
     }
     
+    private String getInput() {
+        
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        try{
+            return reader.readLine();
+        }catch(IOException e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+    private String getInput(int minSize) {
+        String input = getInput();
+        while (input.length() < minSize) {
+            input = getInput();
+        }
+        return input;
+    }
+
+    private boolean sendMessage(String message) {
+        byte[] data = message.getBytes();
+        DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
+        try {
+            socket.send(packet);
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
+    }
 }
