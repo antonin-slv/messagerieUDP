@@ -30,7 +30,7 @@ Le serveur enregistre le client dans la liste des clients connectés et lui envo
 Le serveur lance un thread pour chaque client connecté qui va traiter les messages envoyés par le client.
 Chacun de ces threads utilisent un port différent pour communiquer avec le client.
 
-## deconexion
+## deconnexion
 
 Message envoyé par le client pour se deconnecter ```/quit```.
 Le serveur passe l'utilisateur a deconecté dans la liste des clients et le thread du serveur dedié a ce client se termine.
